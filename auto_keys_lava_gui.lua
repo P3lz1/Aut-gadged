@@ -34,6 +34,9 @@ local actions = {
 local gui = Instance.new("ScreenGui")
 gui.Name = "LavaAutoKeysGui"
 gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 999999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
 
 local frame = Instance.new("Frame")
@@ -62,6 +65,8 @@ backgroundImage.Position = UDim2.new(0, 0, 0, 0)
 backgroundImage.BackgroundTransparency = 1
 backgroundImage.Image = BACKGROUND_IMAGE
 backgroundImage.ScaleType = Enum.ScaleType.Crop
+backgroundImage.Active = false
+backgroundImage.Selectable = false
 backgroundImage.ZIndex = 1
 backgroundImage.Parent = frame
 
@@ -70,6 +75,8 @@ darkOverlay.Size = UDim2.new(1, 0, 1, 0)
 darkOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 darkOverlay.BackgroundTransparency = 0.22
 darkOverlay.BorderSizePixel = 0
+darkOverlay.Active = false
+darkOverlay.Selectable = false
 darkOverlay.ZIndex = 2
 darkOverlay.Parent = frame
 
@@ -116,9 +123,15 @@ toggleCorner.CornerRadius = UDim.new(0, 6)
 toggleCorner.Parent = mainToggle
 
 local function pressKey(keyCode)
-    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-    task.wait()
-    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+    end)
+
+    task.wait(0.03)
+
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+    end)
 end
 
 local function setLeftClickHold(state)
@@ -129,13 +142,17 @@ local function setLeftClickHold(state)
     leftClickHeld = state
 
     local mousePos = UserInputService:GetMouseLocation()
-    VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, state, game, 0)
+    pcall(function()
+        VirtualInputManager:SendMouseButtonEvent(mousePos.X, mousePos.Y, 0, state, game, 0)
+    end)
 end
 
 local function releaseAll()
     for _, action in ipairs(actions) do
         if action.key then
-            VirtualInputManager:SendKeyEvent(false, action.key, false, game)
+            pcall(function()
+                VirtualInputManager:SendKeyEvent(false, action.key, false, game)
+            end)
         end
     end
 
